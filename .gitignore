@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+MorphSys/__pycache__/
+utils/__pycache__/
+
+# Pyre type checker
+.pyre/
+.vscode
+data/*
+exp/
+res/
+.tensorboard/
+log/
+
+*.jpg
