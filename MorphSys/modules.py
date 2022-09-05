@@ -73,9 +73,9 @@ class ExpertClip(nn.Module):
         return x
 
 
-class CondRescale(nn.Module):
+class TimeScaling(nn.Module):
     def __init__(self, num_conds, tgt_sample):
-        super(CondRescale, self).__init__()
+        super(TimeScaling, self).__init__()
 
         self.scale = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
         self.num_experts = len(self.scale)
@@ -108,9 +108,9 @@ class CondRescale(nn.Module):
         return res.sum(dim=1), expert_weight
 
 
-class Conv3dDecExpert(nn.Module):
+class Conv3dDec(nn.Module):
     def __init__(self, num_conds, final_dim, cond_proj_dim, num_pre_conv, num_rescale, rescale, hidden_channels, args, final_interpolate, act=nn.PReLU()):
-        super(Conv3dDecExpert, self).__init__()
+        super(Conv3dDec, self).__init__()
 
         self.num_conds = num_conds
         self.init_feat = final_dim + cond_proj_dim
@@ -126,7 +126,7 @@ class Conv3dDecExpert(nn.Module):
         )
         self.num_rescale = num_rescale
         self.rescales = nn.ModuleList(
-            CondRescale(self.num_conds, rescale[i]) for i in range(num_rescale)
+            TimeScaling(self.num_conds, rescale[i]) for i in range(num_rescale)
         )
         self.up_conv = nn.ModuleList(
             nn.Sequential(

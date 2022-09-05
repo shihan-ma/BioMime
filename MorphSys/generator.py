@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from MorphSys.modules import Conv3dEnc, Conv3dDecExpert
+from MorphSys.modules import Conv3dEnc, Conv3dDec
 
 
 class Generator(nn.Module):
@@ -25,7 +25,7 @@ class Generator(nn.Module):
         self.decode_input = nn.Linear(self.latent_dim, self.final_feat)
 
         dec = cfg.Dec
-        self.decoder = Conv3dDecExpert(self.num_conds, enc.out_channel, dec.cond_proj_dim, dec.num_pre_conv, dec.num_rescale, dec.rescale, dec.up_conv.hidden_channels, dec.up_conv.args, dec.final_interpolate)
+        self.decoder = Conv3dDec(self.num_conds, enc.out_channel, dec.cond_proj_dim, dec.num_pre_conv, dec.num_rescale, dec.rescale, dec.up_conv.hidden_channels, dec.up_conv.args, dec.final_interpolate)
 
     def encode(self, input):
         """
