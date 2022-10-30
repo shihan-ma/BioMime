@@ -34,6 +34,13 @@ def load_model(epoch, dataset, exp_id, generator, discriminator, g_optimizer, d_
     return generator, discriminator, g_optimizer, d_optimizer, checkpoint['epoch']
 
 
+def load_generator(ckp_fpath, generator):
+    checkpoint = torch.load(ckp_fpath)
+    generator.load_state_dict(checkpoint['generator'])
+
+    return generator
+
+
 # Set random seed for reproducibility.
 def setup_seed(seed):
     random.seed(seed)

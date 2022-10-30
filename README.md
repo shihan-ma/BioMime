@@ -1,4 +1,4 @@
-# MorphSys
+# BioMime
 Deep latent generative model that learns human biophysics.
 
 
@@ -14,7 +14,7 @@ Deep latent generative model that learns human biophysics.
 
 
 ### Conda environment
-environment.yml contains all the dependencies required to run MorphSys. Create the new environment by:
+environment.yml contains all the dependencies required to run BioMime. Create the new environment by:
 
 ```bash
 conda env create --file environment.yml
@@ -26,13 +26,13 @@ Please contact [neurodec](http://neurodec.ai/) for the dataset.
 
 ## Quick Start
 ### Train
-When you have your data ready, please follow the instructions below to train your own MorphSys:
+When you have your data ready, please follow the instructions below to train your own BioMime:
 1. Edit utils/data.py to specify the path for dataset.
 2. Configure the models and setting up in config/config.yaml.
 3. Run the training script by:
 
 ```bash
-python train_morphsys.py --exp=test
+python train.py --exp=test
 ```
 Define your own experiment id by changing the argument exp.
 
@@ -40,7 +40,7 @@ Define your own experiment id by changing the argument exp.
 The checkpoints at snapshot epochs will be saved in res/exp/. You can test the model by:
 
 ```bash
-python test_morphsys.py --exp=test --epoch_name=50 --num_sample=32 --plot=1
+python test.py --exp=test --epoch_name=50 --num_sample=32 --plot=1
 ```
 
 
