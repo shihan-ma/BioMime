@@ -11,5 +11,7 @@ exp/
 res/
 .tensorboard/
 log/
+ckp/
 
 *.jpg
+transfer_model.py

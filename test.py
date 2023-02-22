@@ -21,7 +21,7 @@ if __name__ == '__main__':
         test_data_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=cfg.Dataset.num_workers, pin_memory=True)
 
     # Model
-    generator = Generator(cfg.Dataset.num_cond, cfg.Model.Generator.Latent)
+    generator = Generator(cfg.Model.Generator)
 
     dest_path = './exp/{}_{}'.format(cfg.Dataset.Type, args.exp)
     checkpoint = torch.load(dest_path + '/epoch-{}.pth'.format(args.epoch_name))
