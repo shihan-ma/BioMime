@@ -56,6 +56,14 @@ python generate.py --cfg config.yaml --mode morph --model_pth ./ckp/model_linear
 ```
 Make sure you have the file containing MUAPs in the format of [num, nrow, ncol, ntime] and set the argument `--data_path`. Examples of MUAP files will be provided in the future.
 
+We also allow users to generate dynamic MUAPs during a realistic forearm movement defined by a musculoskeletal model.
+Download [ARMS_Wrist_Hand_Model_4.3.zip](https://drive.google.com/drive/folders/17Z2QH5NNaIv9p4iDq8HqytFaYk9Qnv2C?usp=sharing) and unzip it under `MSK/models/.`
+The OpenSim model is `Hand_Wrist_Model_for_development.osim` developed by DC McFarland, et al., A musculoskeletal model of the hand and wrist capable of simulating functional tasks. IEEE Transactions on Biomed. Eng. (2022).
+
+Download [poses.csv](https://drive.google.com/drive/folders/17Z2QH5NNaIv9p4iDq8HqytFaYk9Qnv2C?usp=sharing) and unzip it under `MSK/.`. This file predefines six poses, including open hand ('open' or 'default'), grasp ('grasp'), wrist flexion ('flex'), wrist extension ('ext'), radial deviation ('rdev'), and ulnar deviation ('udev). Define your own movement by setting `fs`, `poses`, and `durations` in `prepare_params.py`
+
+`ms_labels` should be defined in `generate.py`, which represents the muscle labels of each MU, i.e., which muscle it belongs to.
+
 
 ## Licenses
 This repository is released under the GNU General Public License v3.0.

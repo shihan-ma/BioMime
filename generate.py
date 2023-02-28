@@ -9,6 +9,7 @@ from scipy.signal import butter, filtfilt
 
 from utils.basics import update_config, load_generator
 from utils.plot_functions import plot_muaps
+from utils.prepare_params import num_samples, steps, num, depth, angle, iz, cv, length, changes
 from BioMime.generator import Generator
 
 if __name__ == '__main__':
@@ -17,8 +18,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--model_pth', required=True, type=str, help='file of best model')
     parser.add_argument('--mode', default='sample', type=str, help='sample or morph')
-    parser.add_argument('--steps', default=20, type=int, help='interpolation steps')
-    parser.add_argument('--num_samples', default=5, type=int, help='number of muaps to generate by sampling')
     parser.add_argument('--data_path', default='default', type=str, help='file of data to morph')
     parser.add_argument('--res_path', required=True, type=str, help='path of result folder')
 
@@ -32,9 +31,20 @@ if __name__ == '__main__':
         muaps = np.load(args.data_path)
         num_samples = muaps.shape[0]
     else:
-        num_samples = args.num_samples
         zi = torch.randn(num_samples, cfg.Model.Generator.Latent)
-    steps = args.steps
+
+    # Define muscle labels for each MU if you want to use msk model, List(str), len = num_samples
+    # all possible muscle labels: ['ECRL', 'ECRB', 'ECU', 'FCR', 'FCU', 'PL', 'FDSL', 'FDSR', 'FDSM', 'FDSI', 'FDPL', 'FDPR', 'FDPM', 'FDPI', 'EDCL', 'EDCR', 'EDCM', 'EDCI', 'EDM', 'EIP', 'EPL', 'EPB', 'FPL', 'APL', 'APB', 'FPB', 'OPP', 'ADPt', 'ADPo', 'ADM', 'FDM'] in current msk model
+    # The most commonly used forearm muscles: ECRL, ECRB, ECU, FCR, FCU, PL, FDS, FDP, EDC, EDM, EPL, FPL
+    if len(changes) > 0:
+        # ----------- user defined -----------
+        ms_labels = ['ECRL', 'ECRB', 'ECU', 'FCU', 'FDSI']
+        # ----------- user defined -----------
+        assert len(ms_labels) == num_samples
+        ch_depth = changes['depth'].loc[:, ms_labels]
+        ch_cv = changes['cv'].loc[:, ms_labels]
+        ch_ms_lens = changes['len'].loc[:, ms_labels]
+        assert ch_depth.shape[0] == steps and ch_cv.shape[0] == steps and ch_ms_lens.shape[0] == steps, (ch_depth.shape[0], ch_cv.shape[0], ch_ms_lens.shape[0], steps)
 
     # Model
     generator = Generator(cfg.Model.Generator)
@@ -47,28 +57,29 @@ if __name__ == '__main__':
     if not os.path.exists(args.res_path):
         os.mkdir(args.res_path)
 
-    # set the six conditions, each with dim (steps,), note that the range should be within [0.5, 1.0]
-    # To give an example, here we interpolate the six conditions by linspace
-    num = torch.linspace(0.6, 0.9, steps)
-    radius = torch.linspace(0.6, 0.9, steps)
-    angle = torch.linspace(0.6, 0.9, steps)
-    iz = torch.linspace(0.6, 0.9, steps)
-    cv = torch.linspace(0.6, 0.9, steps)
-    len = torch.linspace(0.6, 0.9, steps)
-
     start_time = time.time()
 
     sim_muaps = []
     for sp in tqdm(range(steps), dynamic_ncols=True):
         # cond [num_samples, 6]
-        cond = torch.stack((
-            torch.as_tensor([num[sp]] * num_samples),
-            torch.as_tensor([radius[sp]] * num_samples),
-            torch.as_tensor([angle[sp]] * num_samples),
-            torch.as_tensor([iz[sp]] * num_samples),
-            torch.as_tensor([cv[sp]] * num_samples),
-            torch.as_tensor([len[sp]] * num_samples),
-        )).transpose(1, 0)
+        if len(changes) > 0:
+            cond = torch.vstack((
+                num[:, sp],
+                depth[:, sp] * ch_depth.loc[sp, :].values,
+                angle[:, sp],
+                iz[:, sp],
+                cv[:, sp] * ch_cv.loc[sp, :].values,
+                length[:, sp] * ch_ms_lens.loc[sp, :].values,
+            )).transpose(1, 0)
+        else:
+            cond = torch.vstack((
+                num[:, sp],
+                depth[:, sp],
+                angle[:, sp],
+                iz[:, sp],
+                cv[:, sp],
+                length[:, sp],
+            )).transpose(1, 0)
 
         if torch.cuda.is_available():
             cond = cond.cuda()
