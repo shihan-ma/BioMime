@@ -64,8 +64,8 @@ def mov2len(mov, ms_labels, normalise=True):
     for dof_id, deg in enumerate(default_pose):
         coordinate = np.radians(deg)
         dof = pose_basis.iloc[dof_id, 0]
-        model.updCoordinateSet().get(dof).setValue(state, coordinate)
-        model.realizePosition(state)
+        model.updCoordinateSet().get(dof).setValue(state, coordinate, False)
+    model.assemble(state)
     model.equilibrateMuscles(state)
     for ms in ms_labels:
         ms_len_default[ms] = model.getMuscles().get(ms).getFiberLength(state)
@@ -88,9 +88,24 @@ def mov2len(mov, ms_labels, normalise=True):
     return ms_lens
 
 
-def pos2params(poses, durations, ms_labels, fs=5):
+def mov2fl(mov):
+    mov_fl = mov.copy(deep=True)
+    mov_fl.loc[:, 'deviation'] = mov_fl.loc[:, 'deviation'] * np.pi / 180
+    mov_fl.loc[:, 'flexion'] = mov_fl.loc[:, 'flexion'] * np.pi / 180
+    mov_fl.to_csv('./MSK/mov.mot', sep='\t', index=False)
+    header = 'motionfile\n' + 'version=1\n' + 'nRows={}\n'.format(mov_fl.shape[0]) + 'nColumns={}\n'.format(mov_fl.shape[1]) + 'inDegrees=yes\n' + 'endheader\n' + '\n'
+    with open('./MSK/mov.mot', 'r+') as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(header + content)
+
+
+def pos2params(poses, durations, ms_labels, fs=5, write=False):
     mov = pos2mov(poses, durations, fs)
     ms_lens = mov2len(mov, ms_labels, True)
+
+    if write:
+        mov2fl(mov)
 
     # Assumption: constant volume
     # If lens change by s (*s times), correspondingly depths will change by 1/sqrt(s) and cvs will change by 1/s.
@@ -110,7 +125,8 @@ def pos2params(poses, durations, ms_labels, fs=5):
 if __name__ == '__main__':
     # poses = ['default', 'default+flex', 'default', 'default+ext', 'default']
     # durations = [2] * 4
-    poses = ['default', 'grasp', 'grasp+flex', 'grasp', 'grasp+ext', 'grasp', 'default']
+    # poses = ['default', 'grasp', 'grasp+flex', 'grasp', 'grasp+ext', 'grasp', 'default']
+    poses = ['default', 'flex', 'default', 'ext', 'default', 'grasp', 'default']
     durations = [2] * 6
     fs = 5
 
@@ -122,7 +138,7 @@ if __name__ == '__main__':
     # fig.savefig('./figs/DoFs.jpg')
 
     ms_labels = ['ECRB', 'ECRL', 'PL', 'FCU', 'ECU', 'EDCI', 'FDSI']
-    ms_lens, depths, cvs = pos2params(poses, durations, ms_labels)
+    ms_lens, depths, cvs = pos2params(poses, durations, ms_labels, write=True)
 
     # fig = plt.figure(figsize=(10, 6))
     # for ms in ms_labels:

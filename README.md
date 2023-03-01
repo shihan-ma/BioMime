@@ -65,6 +65,10 @@ Download [poses.csv](https://drive.google.com/drive/folders/17Z2QH5NNaIv9p4iDq8H
 `ms_labels` should be defined in `generate.py`, which represents the muscle labels of each MU, i.e., which muscle it belongs to.
 
 
+### Visualise movement with MSK model
+Set `write=True` in function `pos2params` if you want to save motion file `./MSK/mov.mot`. This is a tricky way to simulate a "realistic" movement but it works for now :P. Then you can visualise the motions after loading the MSK model (.osim) and the motion (mov.mot) to OpenSim.
+
+
 ## Licenses
 This repository is released under the GNU General Public License v3.0.
 
