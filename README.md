@@ -48,11 +48,11 @@ python test.py --exp=test --epoch_name=50 --num_sample=32 --plot=1
 ### Generate
 You can generate your own MUAPs by sampling from the standard Normal Distribution:
 ```bash
-python generate.py --cfg config.yaml --mode sample --model_pth ./ckp/model_linear.pth --res_pth ./res
+python generate.py --cfg config.yaml --mode sample --model_pth ./ckp/model_linear.pth --res_path ./res
 ```
 Or by morphing the existing MUAPs:
 ```bash
-python generate.py --cfg config.yaml --mode morph --model_pth ./ckp/model_linear.pth --res_pth ./res
+python generate.py --cfg config.yaml --mode morph --model_pth ./ckp/model_linear.pth --res_path ./res
 ```
 Make sure you have the file containing MUAPs in the format of [num, nrow, ncol, ntime] and set the argument `--data_path`. Examples of MUAP files will be provided in the future.
 

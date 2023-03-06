@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import opensim as osim
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -71,7 +72,7 @@ def mov2len(mov, ms_labels, normalise=True):
         ms_len_default[ms] = model.getMuscles().get(ms).getFiberLength(state)
 
     # Assign 
-    for t_id, t in enumerate(mov.iloc[:, 0]):
+    for t_id, t in enumerate(tqdm(mov.iloc[:, 0])):
         for dof_id, dof in enumerate(mov.columns[1:]):
             coordinate = np.radians(mov.loc[t_id][dof_id + 1])
             model.updCoordinateSet().get(dof).setValue(state, coordinate)

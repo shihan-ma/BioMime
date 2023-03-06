@@ -7,7 +7,7 @@ from easydict import EasyDict as edict
 from matplotlib.collections import LineCollection
 
 
-def plot_muaps(muaps, path, cfg=None):
+def plot_muaps(muaps, path, mu_indices=[], cfg=None):
     """
     muaps: [arr]
     """
@@ -25,7 +25,9 @@ def plot_muaps(muaps, path, cfg=None):
     for i in np.linspace(1, 0, steps):
         colors.append(list(cmap(i)[:3]))
 
-    for i in range(num_muaps):
+    if len(mu_indices) == 0:
+        mu_indices = np.arange(num_muaps)
+    for i in mu_indices:
         cur_muaps = -muaps[i]
         p_max_amp = np.max(cur_muaps[:])
         n_max_amp = np.min(cur_muaps[:])
