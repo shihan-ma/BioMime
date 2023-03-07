@@ -11,17 +11,17 @@ import numpy as np
 from utils.pose_functions import pos2params
 
 # define the number of motor units here
-num_samples = 5
+num_mus = 5
 
 # # simple linspace params - all MUs in all muscles change consistently
 # # note that the range is better within [0.5, 1.0]
 # steps = 20
-# num = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
-# depth = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
-# angle = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
-# iz = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
-# cv = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
-# length = torch.ones(num_samples, 1) * torch.linspace(0.6, 0.9, steps)
+# num = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
+# depth = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
+# angle = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
+# iz = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
+# cv = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
+# length = torch.ones(num_mus, 1) * torch.linspace(0.6, 0.9, steps)
 # changes = {}
 
 # msk model - muscle-specific changes
@@ -36,12 +36,12 @@ steps = fs * np.sum(durations)
 
 ms_lens, depths, cvs = pos2params(poses, durations, ms_labels)
 # define init absolute params, should be within [0.5, 1.0]
-num = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
-# num = torch.linspace(0.5, 1.0, num_samples).repeat(1, steps)      # increasing fibre numbers
-depth = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
-angle = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
-iz = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
-cv = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
-length = torch.rand(num_samples, 1).repeat(1, steps) / 2 + 0.5
+num = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
+# num = torch.linspace(0.5, 1.0, num_mus).repeat(1, steps)      # increasing fibre numbers
+depth = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
+angle = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
+iz = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
+cv = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
+length = torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5
 
 changes = {'depth': depths, 'cv': cvs, 'len': ms_lens}

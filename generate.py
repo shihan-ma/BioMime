@@ -1,5 +1,4 @@
 import argparse
-import sys
 import os
 import time
 import torch
@@ -9,7 +8,7 @@ from scipy.signal import butter, filtfilt
 
 from utils.basics import update_config, load_generator
 from utils.plot_functions import plot_muaps
-from utils.prepare_params import num_samples, steps, num, depth, angle, iz, cv, length, changes
+from utils.prepare_params import num_mus, steps, num, depth, angle, iz, cv, length, changes
 from BioMime.generator import Generator
 
 if __name__ == '__main__':
@@ -20,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', default='sample', type=str, help='sample or morph')
     parser.add_argument('--data_path', default='default', type=str, help='file of data to morph')
     parser.add_argument('--res_path', required=True, type=str, help='path of result folder')
+    parser.add_argument('--device', default='cuda', type=str, help='cuda|cpu')
 
     args = parser.parse_args()
     cfg = update_config('./config/' + args.cfg)
@@ -29,18 +29,18 @@ if __name__ == '__main__':
     if mode == 'morph':
         assert args.data_path != 'default', 'Datapath for existing MUAPs required.'
         muaps = np.load(args.data_path)
-        num_samples = muaps.shape[0]
+        num_mus = muaps.shape[0]
     else:
-        zi = torch.randn(num_samples, cfg.Model.Generator.Latent)
+        zi = torch.randn(num_mus, cfg.Model.Generator.Latent)
 
-    # Define muscle labels for each MU if you want to use msk model, List(str), len = num_samples
+    # Define muscle labels for each MU if you want to use msk model, List(str), len = num_mus
     # all possible muscle labels: ['ECRL', 'ECRB', 'ECU', 'FCR', 'FCU', 'PL', 'FDSL', 'FDSR', 'FDSM', 'FDSI', 'FDPL', 'FDPR', 'FDPM', 'FDPI', 'EDCL', 'EDCR', 'EDCM', 'EDCI', 'EDM', 'EIP', 'EPL', 'EPB', 'FPL', 'APL', 'APB', 'FPB', 'OPP', 'ADPt', 'ADPo', 'ADM', 'FDM'] in current msk model
     # The most commonly used forearm muscles: ECRL, ECRB, ECU, FCR, FCU, PL, FDS, FDP, EDC, EDM, EPL, FPL
     if len(changes) > 0:
         # ----------- user defined -----------
         ms_labels = ['ECRL', 'ECRB', 'ECU', 'FCU', 'FDSI']
         # ----------- user defined -----------
-        assert len(ms_labels) == num_samples
+        assert len(ms_labels) == num_mus
         ch_depth = changes['depth'].loc[:, ms_labels]
         ch_cv = changes['cv'].loc[:, ms_labels]
         ch_ms_lens = changes['len'].loc[:, ms_labels]
@@ -48,10 +48,14 @@ if __name__ == '__main__':
 
     # Model
     generator = Generator(cfg.Model.Generator)
-    generator = load_generator(args.model_pth, generator)
+    generator = load_generator(args.model_pth, generator, args.device)
     generator.eval()
 
-    if torch.cuda.is_available():
+    # Device
+    if args.device == 'cuda':
+        assert torch.cuda.is_available()
+
+    if args.device == 'cuda':
         generator.cuda()
 
     if not os.path.exists(args.res_path):
@@ -61,7 +65,7 @@ if __name__ == '__main__':
 
     sim_muaps = []
     for sp in tqdm(range(steps), dynamic_ncols=True):
-        # cond [num_samples, 6]
+        # cond [num_mus, 6]
         if len(changes) > 0:
             cond = torch.vstack((
                 num[:, sp],
@@ -81,20 +85,22 @@ if __name__ == '__main__':
                 length[:, sp],
             )).transpose(1, 0)
 
-        if torch.cuda.is_available():
+        if args.device == 'cuda':
             cond = cond.cuda()
 
         if mode == 'morph':
-            if torch.cuda.is_available():
+            if args.device == 'cuda':
                 muaps = muaps.cuda()
             sim = generator.generate(muaps.unsqueeze(1), cond.float())
         elif mode == 'sample':
-            if torch.cuda.is_available():
+            if args.device == 'cuda':
                 zi = zi.cuda()
-            sim = generator.sample(num_samples, cond.float(), cond.device, zi)
+            sim = generator.sample(num_mus, cond.float(), cond.device, zi)
 
-        # Remove .cpu() if you only use cpu
-        sim = sim.permute(0, 2, 3, 1).cpu().detach().numpy()
+        if args.device == 'cuda':
+            sim = sim.permute(0, 2, 3, 1).cpu().detach().numpy()
+        else:
+            sim = sim.permute(0, 2, 3, 1).detach().numpy()
         sim_muaps.append(sim)
 
     sim_muaps = np.array(sim_muaps)
@@ -114,7 +120,7 @@ if __name__ == '__main__':
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
 
     filtered_muaps = filtfilt(b, a, sim_muaps.reshape(-1, time_samples))
-    sim_muaps = filtered_muaps.reshape(num_samples, steps, n_row, n_col, time_samples)
+    sim_muaps = filtered_muaps.reshape(num_mus, steps, n_row, n_col, time_samples)
     print("--- %s seconds ---" % (time.time() - start_time))
 
     plot_muaps(sim_muaps, args.res_path)
