@@ -1,7 +1,6 @@
 import sys
-
-from utils.loss_functions import nrmse_matrix_torch
 sys.path.append('.')
+
 import torch
 from tqdm import tqdm
 import numpy as np
@@ -10,6 +9,7 @@ from utils.args import args, cfg
 from utils.data import MuapWave
 
 from BioMime.generator import Generator
+from utils.loss_functions import nrmse_matrix_torch
 
 
 if __name__ == '__main__':
@@ -17,15 +17,17 @@ if __name__ == '__main__':
 
     # Dataset
     if cfg.Dataset.Type == 'MuapWave':
-        test_dataset = MuapWave(cfg.Dataset.Test, subset=args.test_subset)
+        test_dataset = MuapWave(cfg.Dataset.Test)
         test_data_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=cfg.Dataset.num_workers, pin_memory=True)
 
     # Model
     generator = Generator(cfg.Model.Generator)
 
-    dest_path = './exp/{}_{}'.format(cfg.Dataset.Type, args.exp)
-    checkpoint = torch.load(dest_path + '/epoch-{}.pth'.format(args.epoch_name))
-    generator.load_state_dict(checkpoint['generator'])
+    ckp_path = args.ckp_path
+    checkpoint = torch.load(ckp_path, map_location='cpu')
+    g_dict = generator.state_dict()
+    g_dict.update(checkpoint)
+    generator.load_state_dict(g_dict)
 
     if torch.cuda.is_available():
         generator.cuda()

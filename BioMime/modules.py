@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class Conv3dEnc(nn.Module):
-    def __init__(self, num_layers, in_channel, out_channel, hidden_channels, kernel, stride, pad, act=nn.PReLU()):
+    def __init__(self, num_layers, in_channel, out_channel, hidden_channels, kernel, stride, pad, act=nn.PReLU):
         super(Conv3dEnc, self).__init__()
 
         self.num_layers = num_layers
@@ -23,13 +23,13 @@ class Conv3dEnc(nn.Module):
         self.enc = nn.ModuleList(
             nn.Sequential(
                 nn.Conv3d(i, o, k, s, p),
-                act,
+                act(),
             ) for i, o, k, s, p in zip([in_channel] + h, h + [out_channel], kernel, stride, pad)
         )
         self.conv11 = nn.ModuleList(
             nn.Sequential(
                 nn.Conv3d(i, i, 1, 1, 0),
-                act,
+                act(),
             ) for i in h + [out_channel]
         )
         self.init_weights()
@@ -109,7 +109,7 @@ class TimeScaling(nn.Module):
 
 
 class Conv3dDec(nn.Module):
-    def __init__(self, num_conds, final_dim, cond_proj_dim, num_pre_conv, num_rescale, rescale, hidden_channels, args, final_interpolate, act=nn.PReLU()):
+    def __init__(self, num_conds, final_dim, cond_proj_dim, num_pre_conv, num_rescale, rescale, hidden_channels, args, final_interpolate, act=nn.PReLU):
         super(Conv3dDec, self).__init__()
 
         self.num_conds = num_conds
@@ -121,7 +121,7 @@ class Conv3dDec(nn.Module):
         self.pre_conv = nn.ModuleList(
             nn.Sequential(
                 nn.Conv3d(self.init_feat, self.init_feat, 3, 1, 1),
-                act,
+                act(),
             ) for _ in range(num_pre_conv)
         )
         self.num_rescale = num_rescale
@@ -131,9 +131,9 @@ class Conv3dDec(nn.Module):
         self.up_conv = nn.ModuleList(
             nn.Sequential(
                 nn.Conv3d(i, o, *arg),
-                act,
+                act(),
                 nn.Conv3d(o, o, 1, 1, 0),
-                act,
+                act(),
             ) for i, o, arg in zip([self.init_feat] + hidden_channels[:-1], hidden_channels, [args] * len(hidden_channels))
         )
         self.final_interpolate = final_interpolate

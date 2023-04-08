@@ -7,7 +7,7 @@ from easydict import EasyDict as edict
 from matplotlib.collections import LineCollection
 
 
-def plot_muaps(muaps, path, mu_indices=[], cfg=None):
+def plot_muaps(muaps, path, mu_indices=[], step_indices=[], suffix='ms', svg=False, cfg=None):
     """
     muaps: [arr]
     """
@@ -22,7 +22,9 @@ def plot_muaps(muaps, path, mu_indices=[], cfg=None):
     x_ = np.linspace(0, 1, n_t)
     cmap = plt.get_cmap(cfg.cmap)
     colors = []
-    for i in np.linspace(1, 0, steps):
+    if len(step_indices) == 0:
+        step_indices = np.arange(steps)
+    for i in np.linspace(1, 0, len(step_indices)):
         colors.append(list(cmap(i)[:3]))
 
     if len(mu_indices) == 0:
@@ -34,14 +36,15 @@ def plot_muaps(muaps, path, mu_indices=[], cfg=None):
         fig, axes = plt.subplots(n_row, n_col, figsize=tuple(cfg.figsize))
         for row in range(n_row):
             for col in range(n_col):
-                segs = [np.column_stack([x_, cur_muaps[sp, row, col]]) for sp in range(steps)]
+                segs = [np.column_stack([x_, cur_muaps[sp, row, col]]) for sp in step_indices]
                 line_segments = LineCollection(segs, array=x_, colors=colors, linewidths=(cfg.linewidth), alpha=cfg.alpha)
                 axes[row, col].add_collection(line_segments)
                 axes[row, col].set_ylim([n_max_amp, p_max_amp])
                 axes[row, col].set_axis_off()
         plt.tight_layout()
-        plt.savefig(os.path.join(path, 'muap_{}.jpg'.format(i)))
-        plt.savefig(os.path.join(path, 'muap_{}.svg'.format(i)))
+        plt.savefig(os.path.join(path, '{}_muap_{}.jpg'.format(suffix, i)))
+        if svg:
+            plt.savefig(os.path.join(path, '{}_muap_{}.svg'.format(suffix, i)))
         plt.close()
 
 
