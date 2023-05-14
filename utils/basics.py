@@ -36,7 +36,7 @@ def load_model(epoch, dataset, exp_id, generator, discriminator, g_optimizer, d_
 
 def load_generator(ckp_fpath, generator, device='cuda'):
     checkpoint = torch.load(ckp_fpath, map_location=torch.device(device))
-    generator.load_state_dict(checkpoint['generator'])
+    generator.load_state_dict(checkpoint)
 
     return generator
 

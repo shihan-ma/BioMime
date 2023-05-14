@@ -1,6 +1,5 @@
 name: BioMime
 channels:
-  - opensim-org
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
@@ -24,7 +23,6 @@ dependencies:
   - numpy-base=1.21.5=py37h1e6e340_3
   - openblas=0.3.21=h06a4308_0
   - openblas-devel=0.3.21=h06a4308_0
-  - opensim=4.4=py37np120
   - openssl=1.1.1t=h7f8727e_0
   - packaging=22.0=py37h06a4308_0
   - pandas=1.3.5=py37h8c16a72_0

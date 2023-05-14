@@ -13,10 +13,10 @@ from utils.params import TESTSET1, TRAINSET1, w_amp, coeff_a_a, coeff_a_b, coeff
 class MuapWave(data.Dataset):
     """
     Simulated MUAPs from a realistic forearm finite element-based model
-    Replace the real_path and real_expand_path with your own file paths
+    Replace the real_path with your own file paths
     """
 
-    def __init__(self, cfg, real_path='../muap_data/dataset_origin/', real_expand_path='../muap_data/dataset_interp_extra/'):
+    def __init__(self, cfg, real_path='../muap_data/'):
         super(MuapWave, self).__init__()
 
         self.data_type = cfg.Type
@@ -31,12 +31,8 @@ class MuapWave(data.Dataset):
             self._items1 = self._load_pt(real_path, 'test', 1)
             self._items2 = self._load_pt(real_path, 'test', 2)
             self._num_items = len(self._items1['iz']) + len(self._items2['iz'])
-        elif self.data_type == 'test_real_expand':
-            self._items1 = self._load_pt(real_expand_path, 'test', 1)
-            self._items2 = self._load_pt(real_expand_path, 'test', 2)
-            self._num_items = len(self._items1['iz']) + len(self._items2['iz'])
 
-        if self.data_type == 'test_real' or self.data_type == 'test_real_expand':
+        if self.data_type == 'test_real':
             self.tgt_idx = np.random.permutation(self._num_items)
 
     def __getitem__(self, index):
@@ -47,7 +43,7 @@ class MuapWave(data.Dataset):
             src = self._select_item('train', index)
             return src, tgt, sp
 
-        elif self.data_type == 'test_real' or self.data_type == 'test_real_expand':
+        elif self.data_type == 'test_real':
             tgt_idx = self.tgt_idx[index]
             src = self._select_item('test', index)
             tgt = self._select_item('test', tgt_idx)
@@ -94,8 +90,8 @@ if __name__ == '__main__':
     data_bar = tqdm(dataloader, desc='Test MuapWave Class', dynamic_ncols=True)
     for src, tgt, sp in data_bar:
         src_muap = src['hd_wave'].permute(0, 3, 1, 2)
-        print('src_muap.shape: ', src_muap.shape)
 
+        print('src_muap.shape: ', src_muap.shape)
         print(tgt['iz'].shape)
         print(sp['hd_wave'].shape)
 
