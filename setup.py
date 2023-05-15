@@ -11,7 +11,5 @@ setup(
 
     url='https://github.com/shihan-ma/BioMime',
 
-    packages=find_packages(
-        where="BioMime"
-    )
+    packages=find_packages()
 )
