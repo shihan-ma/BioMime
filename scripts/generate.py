@@ -6,10 +6,10 @@ import numpy as np
 from tqdm import tqdm
 from scipy.signal import butter, filtfilt
 
-from utils.basics import update_config, load_generator
-from utils.plot_functions import plot_muaps
-from utils.prepare_params import num_mus, steps, num, depth, angle, iz, cv, length, changes
-from BioMime.generator import Generator
+from BioMime.utils.basics import update_config, load_generator
+from BioMime.utils.plot_functions import plot_muaps
+from BioMime.utils.params import num_mus, steps, tgt_params
+from BioMime.models.generator import Generator
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate MUAPs')
@@ -33,19 +33,6 @@ if __name__ == '__main__':
     else:
         zi = torch.randn(num_mus, cfg.Model.Generator.Latent)
 
-    # Define muscle labels for each MU if you want to use msk model, List(str), len = num_mus
-    # all possible muscle labels: ['ECRL', 'ECRB', 'ECU', 'FCR', 'FCU', 'PL', 'FDSL', 'FDSR', 'FDSM', 'FDSI', 'FDPL', 'FDPR', 'FDPM', 'FDPI', 'EDCL', 'EDCR', 'EDCM', 'EDCI', 'EDM', 'EIP', 'EPL', 'EPB', 'FPL', 'APL', 'APB', 'FPB', 'OPP', 'ADPt', 'ADPo', 'ADM', 'FDM'] in current msk model
-    # The most commonly used forearm muscles: ECRL, ECRB, ECU, FCR, FCU, PL, FDS, FDP, EDC, EDM, EPL, FPL
-    if len(changes) > 0:
-        # ----------- user defined -----------
-        ms_labels = ['ECRL', 'ECRB', 'ECU', 'FCU', 'FDSI']
-        # ----------- user defined -----------
-        assert len(ms_labels) == num_mus
-        ch_depth = changes['depth'].loc[:, ms_labels]
-        ch_cv = changes['cv'].loc[:, ms_labels]
-        ch_ms_lens = changes['len'].loc[:, ms_labels]
-        assert ch_depth.shape[0] == steps and ch_cv.shape[0] == steps and ch_ms_lens.shape[0] == steps, (ch_depth.shape[0], ch_cv.shape[0], ch_ms_lens.shape[0], steps)
-
     # Model
     generator = Generator(cfg.Model.Generator)
     generator = load_generator(args.model_pth, generator, args.device)
@@ -66,24 +53,14 @@ if __name__ == '__main__':
     sim_muaps = []
     for sp in tqdm(range(steps), dynamic_ncols=True):
         # cond [num_mus, 6]
-        if len(changes) > 0:
-            cond = torch.vstack((
-                num[:, sp],
-                depth[:, sp] * ch_depth.loc[sp, :].values,
-                angle[:, sp],
-                iz[:, sp],
-                cv[:, sp] * ch_cv.loc[sp, :].values,
-                length[:, sp] * ch_ms_lens.loc[sp, :].values,
-            )).transpose(1, 0)
-        else:
-            cond = torch.vstack((
-                num[:, sp],
-                depth[:, sp],
-                angle[:, sp],
-                iz[:, sp],
-                cv[:, sp],
-                length[:, sp],
-            )).transpose(1, 0)
+        cond = torch.vstack((
+            tgt_params['num'][:, sp],
+            tgt_params['depth'][:, sp],
+            tgt_params['angle'][:, sp],
+            tgt_params['iz'][:, sp],
+            tgt_params['cv'][:, sp],
+            tgt_params['length'][:, sp],
+        )).transpose(1, 0)
 
         if args.device == 'cuda':
             cond = cond.cuda()
@@ -126,4 +103,4 @@ if __name__ == '__main__':
     plot_muaps(sim_muaps, args.res_path)
 
     # Save data
-    # np.save(os.path.join(args.res_path, 'muaps_{}.npy'.format(mode)), sim_muaps)
+    np.save(os.path.join(args.res_path, 'muaps_{}.npy'.format(mode)), sim_muaps)

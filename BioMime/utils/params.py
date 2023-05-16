@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 
 
@@ -42,3 +43,16 @@ TEST_MU_NUMS = np.cumsum(TEST_MU_NUM * 256)[[0, 1, 2, 3, 4, 5, 6, 12, 13]]
 TEST_MU_NUM = TEST_MU_NUM[[1, 2, 3, 4, 5, 6, 12, 13]]
 TRAINSET1 = 145920
 TESTSET1 = 48384
+
+# define the expected parameters for sampling or morphing MUAPs
+num_mus = 5         # number of MUAPs to be simulated
+steps = 100         # time steps
+# define init absolute params, should be within [0.5, 1.0]
+tgt_params = {
+    'num': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5,           # number of fibres
+    'depth': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5,         # MU depth
+    'angle': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5,         # MU medial-lateral position
+    'iz': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5,            # innervation zone
+    'cv': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5,            # current source propagation velocity
+    'length': torch.rand(num_mus, 1).repeat(1, steps) / 2 + 0.5         # fibre length
+}

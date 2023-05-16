@@ -5,12 +5,12 @@ import torch
 from torch import optim
 from tqdm import tqdm
 
-from BioMime.discriminator import Discriminator
-from BioMime.generator import Generator
-from utils.args import args, cfg
-from utils.data import MuapWave
-from utils.basics import kl_anneal_function, setup_seed, load_model, save_model, DataLogger
-from utils.loss_functions import nrmse_matrix_torch
+from BioMime.models.discriminator import Discriminator
+from BioMime.models.generator import Generator
+from BioMime.utils.args import args, cfg
+from BioMime.utils.data import MuapWave
+from BioMime.utils.basics import kl_anneal_function, setup_seed, load_model, save_model, DataLogger
+from BioMime.utils.loss_functions import nrmse_matrix_torch
 
 
 if __name__ == '__main__':

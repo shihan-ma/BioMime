@@ -5,11 +5,10 @@ import torch
 from tqdm import tqdm
 import numpy as np
 
-from utils.args import args, cfg
-from utils.data import MuapWave
-
-from BioMime.generator import Generator
-from utils.loss_functions import nrmse_matrix_torch
+from BioMime.utils.args import args, cfg
+from BioMime.utils.data import MuapWave
+from BioMime.utils.loss_functions import nrmse_matrix_torch
+from BioMime.models.generator import Generator
 
 
 if __name__ == '__main__':
