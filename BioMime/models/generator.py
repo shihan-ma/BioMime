@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from models.modules import Conv3dEnc, Conv3dDec
+from BioMime.models.modules import Conv3dEnc, Conv3dDec
 
 
 class Generator(nn.Module):
