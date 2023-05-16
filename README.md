@@ -34,7 +34,7 @@ When you have your data ready, please follow the instructions below to train you
 3. Run the training script by:
 
 ```bash
-python train.py --exp=test
+python scripts/train.py --exp=test
 ```
 Define your own experiment id by changing the argument `--exp`.
 
@@ -42,13 +42,13 @@ Define your own experiment id by changing the argument `--exp`.
 The checkpoints at snapshot epochs will be saved in res/exp/. You can test the model by:
 
 ```bash
-python test.py --ckp_pth=./ckp/linear_anneal.pth --num_sample=32 --plot=1
+python scripts/test.py --ckp_pth=./ckp/linear_anneal.pth --num_sample=32 --plot=1
 ```
 
 ### Generate
 You can generate your own MUAPs by sampling from the standard Normal Distribution:
 ```bash
-python generate.py --cfg config.yaml --mode sample --model_pth ./ckp/model_linear.pth --res_path ./res
+python scripts/generate.py --cfg config.yaml --mode sample --model_pth ./ckp/model_linear.pth --res_path ./res
 ```
 Or by morphing the existing MUAPs:
 ```bash
@@ -57,6 +57,15 @@ python generate.py --cfg config.yaml --mode morph --model_pth ./ckp/model_linear
 Make sure you have the file containing MUAPs in the format of [num, nrow, ncol, ntime] and set the argument `--data_path`. Examples of MUAP files will be provided in the future.
 
 We also allow users to generate dynamic MUAPs during a realistic forearm movement defined by a musculoskeletal model. This new function will be available soon.
+
+### Install BioMime as a python package
+```bash
+pip install git+https://github.com/shihan-ma/BioMime.git
+```
+Uninstall BioMime before updating it.
+```bash
+pip uninstall BioMime
+```
 
 
 ## Licenses
